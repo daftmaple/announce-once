@@ -1,0 +1,17 @@
+{
+  "clientId": "insert client id here",
+  "clientSecret": "insert client secret here",
+  "channels": [
+    {
+      "channelName": "twitch",
+      "triggers": [
+        {
+          "command": "!ping",
+          "message": "Pong!",
+          "color": "blue"
+        }
+      ]
+    }
+  ],
+  "botName": "name of the bot"
+}
