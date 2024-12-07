@@ -88,7 +88,7 @@ const main = async () => {
     );
 
     if (channelToTrigger) {
-      // Check user privilege
+      // Check text message's user privilege
       if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
 
       // Get text message if match any trigger

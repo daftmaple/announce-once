@@ -43,7 +43,7 @@ Use the `config.example.json` provided, copy it as `config.json`. Within the cha
 ```json
 {
   "channelName": "channel name where you are broadcaster/mod",
-  "triggers: [
+  "triggers": [
     {
       "command": "Text where message below will be sent if matches the text sent on chat",
       "message": "Message announced by the bot",
