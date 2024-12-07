@@ -114,6 +114,39 @@ const main = async () => {
       }
     }
   });
+
+  chatClient.onRaid(
+    async (currentChannelName, _raiderChannelName, raidInfo, msg) => {
+      // Get matching channel from channels list
+      const channelToTrigger = channels.find(
+        ({ channelName }) => channelName === currentChannelName
+      );
+
+      // Send shoutout command to channel if shoutout is enabled
+      if (channelToTrigger && channelToTrigger.shoutout.enabled) {
+        const { minViewer } = channelToTrigger.shoutout;
+        // Do not shoutout if minViewer is set and raider count is strictly lower than minimum viewer
+        if (typeof minViewer === "number" && raidInfo.viewerCount < minViewer)
+          return;
+
+        await apiClient.asUser(user.id, async (context) => {
+          if (msg.channelId && msg.userInfo.userId) {
+            /**
+             * If broadcaster is not live, this api call will throw error, hence wrapped with try-catch
+             */
+            try {
+              await context.chat.shoutoutUser(
+                msg.channelId,
+                msg.userInfo.userId
+              );
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        });
+      }
+    }
+  );
 };
 
 main();

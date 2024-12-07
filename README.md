@@ -1,6 +1,11 @@
 # Announce Once
 
-Simple bot to run announce command with inbuilt cooldown. You can run this for multiple channels where your bot is modded.
+Simple bot to:
+
+- run announce command with inbuilt cooldown
+- shoutout-on-raid
+
+You can run these features for multiple channels wherever your bot is modded.
 
 ## Setup
 
@@ -10,8 +15,15 @@ You need to set both `config.json` and `tokens.json`. Guides is available below.
 
 Obtain your Oauth token with the guide provided by [this project](https://github.com/daftmaple/twitch-oauth-token), scopes needed are:
 
-```
-"scopes": ["moderator:manage:announcements", "chat:read", "chat:edit"]
+```json
+{
+  "scope": [
+    "chat:edit",
+    "chat:read",
+    "moderator:manage:announcements",
+    "moderator:manage:shoutouts"
+  ]
+}
 ```
 
 Once you have obtained the token, copy the token to the root directory of this project as `tokens.json`, and rename these properties on the `tokens.json` file:
@@ -50,7 +62,11 @@ Use the `config.example.json` provided, copy it as `config.json`. Within the cha
       "color": "Colour of the announcement, optional",
       "cooldown": "Cooldown of the command, in seconds, optional (defaults to 10 seconds)"
     }
-  ]
+  ],
+  "shoutout": {
+    "enabled": "if shoutout of raider is enabled, in boolean",
+    "minViewer": "minimum viewer required to shout out user automatically"
+  }
 }
 ```
 

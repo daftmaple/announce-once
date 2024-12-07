@@ -10,7 +10,11 @@
           "message": "Pong!",
           "color": "blue"
         }
-      ]
+      ],
+      "shoutout": {
+        "enabled": true,
+        "minViewer": 5
+      }
     }
   ],
   "botName": "name of the bot"

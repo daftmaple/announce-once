@@ -16,10 +16,16 @@ export const configSchema = z.object({
             .optional(),
         })
       ),
+      shoutout: z.object({
+        enabled: z.boolean(),
+        minViewer: z.number().optional(),
+      }),
     })
   ),
   botName: z.string(),
 });
+
+// type Config = z.infer<typeof configSchema>;
 
 export const tokensSchema = z.object({
   accessToken: z.string(),
