@@ -100,7 +100,7 @@ const main = async () => {
         const { message, color, cooldown } = triggerMessage;
 
         // Check timer
-        if (shouldRunCommand(user.id, text, cooldown ?? 10)) {
+        if (shouldRunCommand(currentChannelName, text, cooldown ?? 10)) {
           // Send command to channel, we need to use apiClient.asUser: https://twurple.js.org/docs/auth/concepts/context-switching.html
           await apiClient.asUser(user.id, async (context) => {
             if (!msg.channelId) return;
