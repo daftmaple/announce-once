@@ -4,8 +4,15 @@ import { ChatClient } from "@twurple/chat";
 import fs from "fs";
 import path from "path";
 
-import { configSchema, tokensSchema } from "./validator";
-import { shouldRunCommand } from "./cooldown";
+import {
+  configSchema,
+  MessageAsInputTrigger,
+  RaidAsInputTrigger,
+  tokensSchema,
+  Trigger,
+} from "./validator";
+import { messageHandler, raidHandler } from "./module";
+import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 
 /**
  * Initial validation
@@ -63,6 +70,13 @@ const main = async () => {
     throw new Error("Invalid bot username");
   }
 
+  // Get asUser context since we need to send command to a channel as current user (asUser) https://twurple.js.org/docs/auth/concepts/context-switching.html
+  const apiClientAsUser = await new Promise<BaseApiClient>((resolve) => {
+    apiClient.asUser(user.id, async (context) => {
+      resolve(context);
+    });
+  });
+
   /**
    * chat client section
    */
@@ -81,67 +95,61 @@ const main = async () => {
     console.log(`Bot has joined ${broadcasterName} as ${botName}`);
   });
 
-  chatClient.onMessage(async (currentChannelName, _user, text, msg) => {
+  chatClient.onMessage(async (currentChannelName, userName, text, msg) => {
     // Get matching channel from channels list
     const channelToTrigger = channels.find(
       ({ channelName }) => channelName === currentChannelName
     );
 
     if (channelToTrigger) {
-      // Check text message's user privilege
-      if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
+      const filterMessageAsInputTrigger = (
+        t: Trigger
+      ): t is MessageAsInputTrigger => t.input.type === "message";
 
-      // Get text message if match any trigger
-      const triggerMessage = channelToTrigger.triggers.find(
-        ({ command }) => command === text
+      // Get matching input trigger
+      const triggers = channelToTrigger.triggers.filter(
+        filterMessageAsInputTrigger
       );
 
-      if (triggerMessage) {
-        const { message, color, cooldown } = triggerMessage;
-
-        // Check timer
-        if (shouldRunCommand(currentChannelName, text, cooldown ?? 10)) {
-          // Send command to channel, we need to use apiClient.asUser: https://twurple.js.org/docs/auth/concepts/context-switching.html
-          await apiClient.asUser(user.id, async (context) => {
-            if (!msg.channelId) return;
-
-            await context.chat.sendAnnouncement(msg.channelId, {
-              message,
-              color,
-            });
-          });
+      triggers.forEach(async (trigger) => {
+        try {
+          await messageHandler(
+            { apiClient: apiClientAsUser, chatClient },
+            trigger
+          )(currentChannelName, userName, text, msg);
+        } catch (e) {
+          console.error(e);
         }
-      }
+      });
     }
   });
 
   chatClient.onRaid(
-    async (currentChannelName, _raiderChannelName, raidInfo, msg) => {
+    async (currentChannelName, raiderChannelName, raidInfo, msg) => {
       // Get matching channel from channels list
       const channelToTrigger = channels.find(
         ({ channelName }) => channelName === currentChannelName
       );
 
       // Send shoutout command to channel if shoutout is enabled
-      if (channelToTrigger && channelToTrigger.shoutout.enabled) {
-        const { minViewer } = channelToTrigger.shoutout;
-        // Do not shoutout if minViewer is set and raider count is strictly lower than minimum viewer
-        if (typeof minViewer === "number" && raidInfo.viewerCount < minViewer)
-          return;
+      if (channelToTrigger) {
+        const filterRaidAsInputTrigger = (
+          t: Trigger
+        ): t is RaidAsInputTrigger => t.input.type === "raid";
 
-        await apiClient.asUser(user.id, async (context) => {
-          if (msg.channelId && msg.userInfo.userId) {
-            /**
-             * If broadcaster is not live, this api call will throw error, hence wrapped with try-catch
-             */
-            try {
-              await context.chat.shoutoutUser(
-                msg.channelId,
-                msg.userInfo.userId
-              );
-            } catch (e) {
-              console.error(e);
-            }
+        // Get matching input trigger
+        const triggers = channelToTrigger.triggers.filter(
+          filterRaidAsInputTrigger
+        );
+
+        triggers.forEach(async (trigger) => {
+          try {
+            await raidHandler(
+              { apiClient: apiClientAsUser, chatClient },
+              trigger
+            )(currentChannelName, raiderChannelName, raidInfo, msg);
+          } catch (e) {
+            console.error(e);
           }
         });
       }

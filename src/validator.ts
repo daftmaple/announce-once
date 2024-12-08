@@ -17,20 +17,29 @@ const announcementKind = z.object({
   color: z.enum(["blue", "green", "orange", "purple", "primary"]).optional(),
 });
 
+export type Announcement = z.infer<typeof announcementKind>;
+
 const shoutoutKind = z.object({
   type: z.literal("shoutout"),
 });
 
-const triggerKind = z.union([
-  z.object({
-    input: raidKind,
-    output: z.union([announcementKind, shoutoutKind]),
-  }),
-  z.object({
-    input: messageKind,
-    output: announcementKind,
-  }),
-]);
+const raidAsInputTrigger = z.object({
+  input: raidKind,
+  output: z.union([announcementKind, shoutoutKind]),
+});
+
+export type RaidAsInputTrigger = z.infer<typeof raidAsInputTrigger>;
+
+const messageAsInputTrigger = z.object({
+  input: messageKind,
+  output: announcementKind,
+});
+
+export type MessageAsInputTrigger = z.infer<typeof messageAsInputTrigger>;
+
+const triggerKind = z.union([raidAsInputTrigger, messageAsInputTrigger]);
+
+export type Trigger = z.infer<typeof triggerKind>;
 
 export const configSchema = z.object({
   clientId: z.string(),
@@ -43,8 +52,6 @@ export const configSchema = z.object({
   ),
   botName: z.string(),
 });
-
-// type Config = z.infer<typeof configSchema>;
 
 export const tokensSchema = z.object({
   accessToken: z.string(),
