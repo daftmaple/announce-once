@@ -6,7 +6,12 @@ import { z } from "zod";
 const messageKind = z.object({
   type: z.literal("message"),
   text: z.string(),
+  role: z.array(
+    z.enum(["broadcaster", "subscriber", "founder", "mod", "vip", "artist"])
+  ),
 });
+
+export type MessageAsInput = z.infer<typeof messageKind>;
 
 const raidKind = z.object({
   type: z.literal("raid"),

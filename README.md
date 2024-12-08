@@ -66,7 +66,7 @@ Use the `config.example.json` provided, copy it as `config.json`. Within the cha
 
 The valid input and output is available on the table below, with explanation for each section
 
-### Table of valid input-output pair
+## Table of valid input-output pair
 
 |                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
 | ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
@@ -77,7 +77,7 @@ The valid input and output is available on the table below, with explanation for
 | Cheers                         |                    |                |                |            |                          |
 | Chat mode change               |                    |                |                |            |                          |
 
-#### Output: Announce (API)
+### Output: Announce (API)
 
 Available colour:
 
@@ -87,7 +87,9 @@ Available colour:
 - purple
 - primary
 
-### Message output replacer available
+## Message output replacer available
+
+Any output fields with message field may have replacer text, which can be replaced by the `MessageScope` object below
 
 ```ts
 export type MessageScope = {
