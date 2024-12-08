@@ -57,18 +57,27 @@ Use the `config.example.json` provided, copy it as `config.json`. Within the cha
   "channelName": "channel name where you are broadcaster/mod",
   "triggers": [
     {
-      "command": "Text where message below will be sent if matches the text sent on chat",
-      "message": "Message announced by the bot",
-      "color": "Colour of the announcement, optional",
-      "cooldown": "Cooldown of the command, in seconds, optional (defaults to 10 seconds)"
+      "input": {}, // Input kind
+      "output": {} // Output kind
     }
-  ],
-  "shoutout": {
-    "enabled": "if shoutout of raider is enabled, in boolean",
-    "minViewer": "minimum viewer required to shout out user automatically"
-  }
+  ]
 }
 ```
+
+The valid input and output is available on the table below, with explanation for each section
+
+## Table of valid input-output pair
+
+|                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
+| ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
+| Message                        | onMessage          | X              | O              |            |                          |
+| Raid                           | onRaid             | O              | O              |            |                          |
+| Subscriptions (Published only) |                    |                |                |            |                          |
+| Action (/me)                   |                    |                |                |            |                          |
+| Cheers                         |                    |                |                |            |                          |
+| Chat mode change               |                    |                |                |            |                          |
+
+### Output: Announce (API)
 
 Available colour:
 
@@ -77,3 +86,31 @@ Available colour:
 - orange
 - purple
 - primary
+
+## Message output replacer available
+
+Any output fields with message field may have replacer text, which can be replaced by the `MessageScope` object below
+
+```ts
+export type MessageScope = {
+  channel: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+  };
+};
+```
+
+To access properties eg. user, use double curly braces as replacer:
+
+```json
+{
+  "type": "announce",
+  "message": "Thank you {{user.name}} for the raid!",
+  "cooldown": 10,
+  "color": "purple"
+}
+```
