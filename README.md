@@ -86,3 +86,29 @@ Available colour:
 - orange
 - purple
 - primary
+
+### Message output replacer available
+
+```ts
+export type MessageScope = {
+  channel: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+  };
+};
+```
+
+To access properties eg. user, use double curly braces as replacer:
+
+```json
+{
+  "type": "announce",
+  "message": "Thank you {{user.name}} for the raid!",
+  "cooldown": 10,
+  "color": "purple"
+}
+```

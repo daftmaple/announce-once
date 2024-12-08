@@ -17,6 +17,9 @@ importers:
       '@twurple/chat':
         specifier: ^7.2.0
         version: 7.2.0(@twurple/auth@7.2.0)
+      micromustache:
+        specifier: ^8.0.3
+        version: 8.0.3
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -261,6 +264,10 @@ packages:
   klona@2.0.6:
     resolution: {integrity: sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==}
     engines: {node: '>= 8'}
+
+  micromustache@8.0.3:
+    resolution: {integrity: sha512-SXjrEPuYNtWq0reR9LR2nHdzdQx/3re9HPcDGjm00L7hi2RsH5KMRBhYEBvPdyQC51RW/2TznjwX/sQLPPyHNw==}
+    engines: {node: '>=8'}
 
   node-fetch@2.7.0:
     resolution: {integrity: sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==}
@@ -564,6 +571,8 @@ snapshots:
       - utf-8-validate
 
   klona@2.0.6: {}
+
+  micromustache@8.0.3: {}
 
   node-fetch@2.7.0:
     dependencies:

@@ -12,34 +12,25 @@ import {
   ChatRaidInfo,
   UserNotice,
 } from "@twurple/chat";
+import { messageFormatter, MessageScope } from "./message";
 
 type Client = {
   apiClient: BaseApiClient;
   chatClient: ChatClient;
 };
 
-type UserContext = {
-  channel: {
-    id: string;
-    name: string;
-  };
-  user: {
-    id: string;
-    name: string;
-  };
-};
-
 const announceHandler = async (
   apiClient: BaseApiClient,
-  { channel }: UserContext,
+  context: MessageScope,
   outputTrigger: AnnounceAsOutput
 ) => {
+  const { channel } = context;
   const { message, cooldown, color } = outputTrigger;
 
   // Check timer
   if (shouldRunCommand(channel.id, message, cooldown ?? 10)) {
     await apiClient.chat.sendAnnouncement(channel.id, {
-      message,
+      message: messageFormatter(message, context),
       color,
     });
   }
@@ -47,7 +38,7 @@ const announceHandler = async (
 
 const shoutoutHandler = async (
   apiClient: BaseApiClient,
-  { channel, user }: UserContext,
+  { channel, user }: MessageScope,
   _outputTrigger: ShoutoutAsOutput
 ) => {
   await apiClient.chat.shoutoutUser(channel.id, user.id);
@@ -67,10 +58,13 @@ export const messageHandler =
     if (trigger.input.text !== text) return;
     if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
 
-    // Compose userContext object
-    if (!msg.channelId) return;
+    // Compose MessageScope object
+    if (!msg.channelId) {
+      console.error("Missing channelId on msg (ChatMessage)");
+      return;
+    }
 
-    const userContext: UserContext = {
+    const MessageScope: MessageScope = {
       channel: {
         id: msg.channelId,
         name: channel,
@@ -82,7 +76,7 @@ export const messageHandler =
     };
 
     if (type === "announce") {
-      await announceHandler(apiClient, userContext, trigger.output);
+      await announceHandler(apiClient, MessageScope, trigger.output);
     }
   };
 
@@ -102,10 +96,13 @@ export const raidHandler =
     if (typeof minViewer === "number" && raidInfo.viewerCount < minViewer)
       return;
 
-    // Compose userContext object
-    if (!msg.channelId) return;
+    // Compose MessageScope object
+    if (!msg.channelId) {
+      console.error("Missing channelId on msg (UserNotice)");
+      return;
+    }
 
-    const userContext: UserContext = {
+    const MessageScope: MessageScope = {
       channel: {
         id: msg.channelId,
         name: channel,
@@ -117,10 +114,10 @@ export const raidHandler =
     };
 
     if (type === "shoutout") {
-      await shoutoutHandler(apiClient, userContext, trigger.output);
+      await shoutoutHandler(apiClient, MessageScope, trigger.output);
     }
 
     if (type === "announce") {
-      await announceHandler(apiClient, userContext, trigger.output);
+      await announceHandler(apiClient, MessageScope, trigger.output);
     }
   };
