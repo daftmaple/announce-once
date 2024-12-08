@@ -6,8 +6,8 @@ import path from "path";
 
 import {
   configSchema,
-  MessageAsInputTrigger,
-  RaidAsInputTrigger,
+  MessageTrigger,
+  RaidTrigger,
   tokensSchema,
   Trigger,
 } from "./validator";
@@ -102,9 +102,8 @@ const main = async () => {
     );
 
     if (channelToTrigger) {
-      const filterMessageAsInputTrigger = (
-        t: Trigger
-      ): t is MessageAsInputTrigger => t.input.type === "message";
+      const filterMessageAsInputTrigger = (t: Trigger): t is MessageTrigger =>
+        t.input.type === "message";
 
       // Get matching input trigger
       const triggers = channelToTrigger.triggers.filter(
@@ -133,9 +132,8 @@ const main = async () => {
 
       // Send shoutout command to channel if shoutout is enabled
       if (channelToTrigger) {
-        const filterRaidAsInputTrigger = (
-          t: Trigger
-        ): t is RaidAsInputTrigger => t.input.type === "raid";
+        const filterRaidAsInputTrigger = (t: Trigger): t is RaidTrigger =>
+          t.input.type === "raid";
 
         // Get matching input trigger
         const triggers = channelToTrigger.triggers.filter(

@@ -1,9 +1,9 @@
 import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 import {
-  AnnounceAsOutput,
-  MessageAsInputTrigger,
-  RaidAsInputTrigger,
-  ShoutoutAsOutput,
+  AnnounceOutput,
+  MessageTrigger,
+  RaidTrigger,
+  ShoutoutOutput,
 } from "./validator";
 import { shouldRunCommand } from "./cooldown";
 import {
@@ -22,7 +22,7 @@ type Client = {
 const announceHandler = async (
   apiClient: BaseApiClient,
   context: MessageScope,
-  outputTrigger: AnnounceAsOutput
+  outputTrigger: AnnounceOutput
 ) => {
   const { channel } = context;
   const { message, cooldown, color } = outputTrigger;
@@ -39,13 +39,13 @@ const announceHandler = async (
 const shoutoutHandler = async (
   apiClient: BaseApiClient,
   { channel, user }: MessageScope,
-  _outputTrigger: ShoutoutAsOutput
+  _outputTrigger: ShoutoutOutput
 ) => {
   await apiClient.chat.shoutoutUser(channel.id, user.id);
 };
 
 export const messageHandler =
-  (client: Client, trigger: MessageAsInputTrigger) =>
+  (client: Client, trigger: MessageTrigger) =>
   async (channel: string, user: string, text: string, msg: ChatMessage) => {
     const { apiClient } = client;
     const { type } = trigger.output;
@@ -81,7 +81,7 @@ export const messageHandler =
   };
 
 export const raidHandler =
-  (client: Client, trigger: RaidAsInputTrigger) =>
+  (client: Client, trigger: RaidTrigger) =>
   async (
     channel: string,
     user: string,

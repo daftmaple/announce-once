@@ -3,7 +3,7 @@ import { z } from "zod";
 /**
  * Input
  */
-const messageKind = z.object({
+const messageInput = z.object({
   type: z.literal("message"),
   text: z.string(),
   role: z.array(
@@ -11,9 +11,9 @@ const messageKind = z.object({
   ),
 });
 
-export type MessageAsInput = z.infer<typeof messageKind>;
+export type MessageInput = z.infer<typeof messageInput>;
 
-const raidKind = z.object({
+const raidInput = z.object({
   type: z.literal("raid"),
   minViewer: z.number().optional(),
 });
@@ -21,22 +21,22 @@ const raidKind = z.object({
 /**
  * Output
  */
-const announcementKind = z.object({
+const announceOutput = z.object({
   type: z.literal("announce"),
   message: z.string(),
   cooldown: z.number().optional(),
   color: z.enum(["blue", "green", "orange", "purple", "primary"]).optional(),
 });
 
-export type AnnounceAsOutput = z.infer<typeof announcementKind>;
+export type AnnounceOutput = z.infer<typeof announceOutput>;
 
-const shoutoutKind = z.object({
+const shoutoutOutput = z.object({
   type: z.literal("shoutout"),
 });
 
-export type ShoutoutAsOutput = z.infer<typeof shoutoutKind>;
+export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
 
-const sayKind = z.object({
+const sayOutput = z.object({
   type: z.literal("say"),
   message: z.string(),
   cooldown: z.number().optional(),
@@ -45,25 +45,25 @@ const sayKind = z.object({
 /**
  * Pairing
  */
-const raidAsInputTrigger = z.object({
-  input: raidKind,
-  output: z.union([announcementKind, shoutoutKind, sayKind]),
+const raidTrigger = z.object({
+  input: raidInput,
+  output: z.union([announceOutput, shoutoutOutput, sayOutput]),
 });
 
-export type RaidAsInputTrigger = z.infer<typeof raidAsInputTrigger>;
+export type RaidTrigger = z.infer<typeof raidTrigger>;
 
-const messageAsInputTrigger = z.object({
-  input: messageKind,
-  output: z.union([announcementKind, sayKind]),
+const messageTrigger = z.object({
+  input: messageInput,
+  output: z.union([announceOutput, sayOutput]),
 });
 
-export type MessageAsInputTrigger = z.infer<typeof messageAsInputTrigger>;
+export type MessageTrigger = z.infer<typeof messageTrigger>;
 
 /**
  * Schema
  */
-const triggerKind = z.union([raidAsInputTrigger, messageAsInputTrigger]);
-export type Trigger = z.infer<typeof triggerKind>;
+const trigger = z.union([raidTrigger, messageTrigger]);
+export type Trigger = z.infer<typeof trigger>;
 
 export const configSchema = z.object({
   clientId: z.string(),
@@ -71,7 +71,7 @@ export const configSchema = z.object({
   channels: z.array(
     z.object({
       channelName: z.string(),
-      triggers: z.array(triggerKind),
+      triggers: z.array(trigger),
     })
   ),
   botName: z.string(),
