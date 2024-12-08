@@ -68,14 +68,14 @@ The valid input and output is available on the table below, with explanation for
 
 ### Table of valid input-output pair
 
-|                                | _ChatClient event_ | Argument | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
-| ------------------------------ | ------------------ | -------- | -------------- | -------------- | ---------- | ------------------------ |
-| Message                        | onMessage          |          | X              | O              |            |                          |
-| Raid                           | onRaid             |          | O              | O              |            |                          |
-| Subscriptions (Published only) |                    |          |                |                |            |                          |
-| Action (/me)                   |                    |          |                |                |            |                          |
-| Cheers                         |                    |          |                |                |            |                          |
-| Chat mode change               |                    |          |                |                |            |                          |
+|                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
+| ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
+| Message                        | onMessage          | X              | O              |            |                          |
+| Raid                           | onRaid             | O              | O              |            |                          |
+| Subscriptions (Published only) |                    |                |                |            |                          |
+| Action (/me)                   |                    |                |                |            |                          |
+| Cheers                         |                    |                |                |            |                          |
+| Chat mode change               |                    |                |                |            |                          |
 
 #### Output: Announce (API)
 

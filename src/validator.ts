@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+/**
+ * Input
+ */
 const messageKind = z.object({
   type: z.literal("message"),
   text: z.string(),
@@ -10,6 +13,9 @@ const raidKind = z.object({
   minViewer: z.number().optional(),
 });
 
+/**
+ * Output
+ */
 const announcementKind = z.object({
   type: z.literal("announce"),
   message: z.string(),
@@ -17,28 +23,41 @@ const announcementKind = z.object({
   color: z.enum(["blue", "green", "orange", "purple", "primary"]).optional(),
 });
 
-export type Announcement = z.infer<typeof announcementKind>;
+export type AnnounceAsOutput = z.infer<typeof announcementKind>;
 
 const shoutoutKind = z.object({
   type: z.literal("shoutout"),
 });
 
+export type ShoutoutAsOutput = z.infer<typeof shoutoutKind>;
+
+const sayKind = z.object({
+  type: z.literal("say"),
+  message: z.string(),
+  cooldown: z.number().optional(),
+});
+
+/**
+ * Pairing
+ */
 const raidAsInputTrigger = z.object({
   input: raidKind,
-  output: z.union([announcementKind, shoutoutKind]),
+  output: z.union([announcementKind, shoutoutKind, sayKind]),
 });
 
 export type RaidAsInputTrigger = z.infer<typeof raidAsInputTrigger>;
 
 const messageAsInputTrigger = z.object({
   input: messageKind,
-  output: announcementKind,
+  output: z.union([announcementKind, sayKind]),
 });
 
 export type MessageAsInputTrigger = z.infer<typeof messageAsInputTrigger>;
 
+/**
+ * Schema
+ */
 const triggerKind = z.union([raidAsInputTrigger, messageAsInputTrigger]);
-
 export type Trigger = z.infer<typeof triggerKind>;
 
 export const configSchema = z.object({

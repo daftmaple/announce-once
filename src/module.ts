@@ -1,5 +1,10 @@
 import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
-import { MessageAsInputTrigger, RaidAsInputTrigger } from "./validator";
+import {
+  AnnounceAsOutput,
+  MessageAsInputTrigger,
+  RaidAsInputTrigger,
+  ShoutoutAsOutput,
+} from "./validator";
 import { shouldRunCommand } from "./cooldown";
 import {
   ChatClient,
@@ -13,9 +18,43 @@ type Client = {
   chatClient: ChatClient;
 };
 
+type UserContext = {
+  channel: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+  };
+};
+
+const announceHandler = async (
+  apiClient: BaseApiClient,
+  { channel }: UserContext,
+  outputTrigger: AnnounceAsOutput
+) => {
+  const { message, cooldown, color } = outputTrigger;
+
+  // Check timer
+  if (shouldRunCommand(channel.id, message, cooldown ?? 10)) {
+    await apiClient.chat.sendAnnouncement(channel.id, {
+      message,
+      color,
+    });
+  }
+};
+
+const shoutoutHandler = async (
+  apiClient: BaseApiClient,
+  { channel, user }: UserContext
+) => {
+  await apiClient.chat.shoutoutUser(channel.id, user.id);
+};
+
 export const messageHandler =
   (client: Client, trigger: MessageAsInputTrigger) =>
-  async (_channel: string, _user: string, text: string, msg: ChatMessage) => {
+  async (channel: string, user: string, text: string, msg: ChatMessage) => {
     const { apiClient } = client;
     const { type } = trigger.output;
 
@@ -27,28 +66,30 @@ export const messageHandler =
     if (trigger.input.text !== text) return;
     if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
 
+    // Compose userContext object
+    if (!msg.channelId) return;
+
+    const userContext: UserContext = {
+      channel: {
+        id: msg.channelId,
+        name: channel,
+      },
+      user: {
+        id: msg.userInfo.userId,
+        name: user,
+      },
+    };
+
     if (type === "announce") {
-      const { message, cooldown, color } = trigger.output;
-
-      // Need channelId to execute API call or message
-      if (!msg.channelId) return;
-      const channelId = msg.channelId;
-
-      // Check timer
-      if (shouldRunCommand(msg.channelId, message, cooldown ?? 10)) {
-        await apiClient.chat.sendAnnouncement(channelId, {
-          message,
-          color,
-        });
-      }
+      await announceHandler(apiClient, userContext, trigger.output);
     }
   };
 
 export const raidHandler =
   (client: Client, trigger: RaidAsInputTrigger) =>
   async (
-    _channel: string,
-    _user: string,
+    channel: string,
+    user: string,
     raidInfo: ChatRaidInfo,
     msg: UserNotice
   ) => {
@@ -60,32 +101,25 @@ export const raidHandler =
     if (typeof minViewer === "number" && raidInfo.viewerCount < minViewer)
       return;
 
+    // Compose userContext object
+    if (!msg.channelId) return;
+
+    const userContext: UserContext = {
+      channel: {
+        id: msg.channelId,
+        name: channel,
+      },
+      user: {
+        id: msg.userInfo.userId,
+        name: user,
+      },
+    };
+
     if (type === "shoutout") {
-      if (msg.channelId && msg.userInfo.userId) {
-        /**
-         * If broadcaster is not live, this api call will throw error, hence wrapped with try-catch
-         */
-        try {
-          await apiClient.chat.shoutoutUser(msg.channelId, msg.userInfo.userId);
-        } catch (e) {
-          console.error(e);
-        }
-      }
+      await shoutoutHandler(apiClient, userContext, trigger.output);
     }
 
     if (type === "announce") {
-      const { message, cooldown, color } = trigger.output;
-
-      // Need channelId to execute API call or message
-      if (!msg.channelId) return;
-      const channelId = msg.channelId;
-
-      // Check timer
-      if (shouldRunCommand(msg.channelId, message, cooldown ?? 10)) {
-        await apiClient.chat.sendAnnouncement(channelId, {
-          message,
-          color,
-        });
-      }
+      await announceHandler(apiClient, userContext, trigger.output);
     }
   };
