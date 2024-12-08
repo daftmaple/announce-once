@@ -71,7 +71,7 @@ The valid input and output is available on the table below, with explanation for
 |                                | _ChatClient event_ | Argument | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
 | ------------------------------ | ------------------ | -------- | -------------- | -------------- | ---------- | ------------------------ |
 | Message                        | onMessage          |          | X              | O              |            |                          |
-| Raid                           | onRaid             |          | O              | X              |            |                          |
+| Raid                           | onRaid             |          | O              | O              |            |                          |
 | Subscriptions (Published only) |                    |          |                |                |            |                          |
 | Action (/me)                   |                    |          |                |                |            |                          |
 | Cheers                         |                    |          |                |                |            |                          |

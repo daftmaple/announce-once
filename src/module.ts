@@ -19,20 +19,20 @@ export const messageHandler =
     const { apiClient } = client;
     const { type } = trigger.output;
 
+    /**
+     * Check input condition:
+     * - If input text is matching the trigger text
+     * - Check text message's user privilege (TODO: to add as check)
+     */
+    if (trigger.input.text !== text) return;
+    if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
+
     if (type === "announce") {
       const { message, cooldown, color } = trigger.output;
 
       // Need channelId to execute API call or message
       if (!msg.channelId) return;
       const channelId = msg.channelId;
-
-      /**
-       * Check conditions:
-       * - Message is matching
-       * - Check text message's user privilege
-       */
-      if (trigger.input.text !== text) return;
-      if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
 
       // Check timer
       if (shouldRunCommand(msg.channelId, message, cooldown ?? 10)) {
@@ -61,10 +61,6 @@ export const raidHandler =
       return;
 
     if (type === "shoutout") {
-      // Do not shoutout if minViewer is set and raider count is strictly lower than minimum viewer
-      if (typeof minViewer === "number" && raidInfo.viewerCount < minViewer)
-        return;
-
       if (msg.channelId && msg.userInfo.userId) {
         /**
          * If broadcaster is not live, this api call will throw error, hence wrapped with try-catch
@@ -74,6 +70,22 @@ export const raidHandler =
         } catch (e) {
           console.error(e);
         }
+      }
+    }
+
+    if (type === "announce") {
+      const { message, cooldown, color } = trigger.output;
+
+      // Need channelId to execute API call or message
+      if (!msg.channelId) return;
+      const channelId = msg.channelId;
+
+      // Check timer
+      if (shouldRunCommand(msg.channelId, message, cooldown ?? 10)) {
+        await apiClient.chat.sendAnnouncement(channelId, {
+          message,
+          color,
+        });
       }
     }
   };
