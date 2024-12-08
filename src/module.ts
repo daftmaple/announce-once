@@ -47,7 +47,8 @@ const announceHandler = async (
 
 const shoutoutHandler = async (
   apiClient: BaseApiClient,
-  { channel, user }: UserContext
+  { channel, user }: UserContext,
+  _outputTrigger: ShoutoutAsOutput
 ) => {
   await apiClient.chat.shoutoutUser(channel.id, user.id);
 };
