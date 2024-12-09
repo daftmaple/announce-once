@@ -1,18 +1,18 @@
+import fs from "fs";
+import path from "path";
 import { RefreshingAuthProvider } from "@twurple/auth";
 import { ApiClient } from "@twurple/api";
 import { ChatClient } from "@twurple/chat";
-import fs from "fs";
-import path from "path";
+import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 
 import {
+  type MessageTrigger,
+  type RaidTrigger,
+  type Trigger,
   configSchema,
-  MessageTrigger,
-  RaidTrigger,
   tokensSchema,
-  Trigger,
 } from "./validator";
 import { messageHandler, raidHandler } from "./module";
-import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 
 /**
  * Initial validation

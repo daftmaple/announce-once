@@ -1,25 +1,27 @@
-import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
-import {
+import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
+import type {
   AnnounceOutput,
   MessageTrigger,
   RaidTrigger,
+  Role,
   ShoutoutOutput,
 } from "./validator";
 import { shouldRunCommand } from "./cooldown";
-import {
+import type {
   ChatClient,
   ChatMessage,
   ChatRaidInfo,
+  ChatUser,
   UserNotice,
 } from "@twurple/chat";
-import { messageFormatter, MessageScope } from "./message";
+import { type MessageScope, messageFormatter } from "./message";
 
 type Client = {
   apiClient: BaseApiClient;
   chatClient: ChatClient;
 };
 
-const announceHandler = async (
+const announceOutputHandler = async (
   apiClient: BaseApiClient,
   context: MessageScope,
   outputTrigger: AnnounceOutput
@@ -36,12 +38,25 @@ const announceHandler = async (
   }
 };
 
-const shoutoutHandler = async (
+const shoutoutOutputHandler = async (
   apiClient: BaseApiClient,
   { channel, user }: MessageScope,
   _outputTrigger: ShoutoutOutput
 ) => {
   await apiClient.chat.shoutoutUser(channel.id, user.id);
+};
+
+const checkValidUser = (user: ChatUser, permission: Role[]): boolean => {
+  // Surely there should be a cleaner way to do this
+  if (user.isBroadcaster && permission.includes("broadcaster")) return true;
+  if (user.isMod && permission.includes("mod")) return true;
+  if (user.isVip && permission.includes("vip")) return true;
+  if (user.isSubscriber && permission.includes("subscriber")) return true;
+  if (user.isFounder && permission.includes("founder")) return true;
+  if (user.isArtist && permission.includes("artist")) return true;
+
+  // Since non-subscriber is the most basic user in chat. Sadly, follower object is not available on ChatUser
+  return permission.includes("non-subscriber");
 };
 
 export const messageHandler =
@@ -53,10 +68,10 @@ export const messageHandler =
     /**
      * Check input condition:
      * - If input text is matching the trigger text
-     * - Check text message's user privilege (TODO: to add as check)
+     * - Check text message's user privilege
      */
     if (trigger.input.text !== text) return;
-    if (!(msg.userInfo.isBroadcaster || msg.userInfo.isMod)) return;
+    if (!checkValidUser(msg.userInfo, trigger.input.role)) return;
 
     // Compose MessageScope object
     if (!msg.channelId) {
@@ -76,7 +91,7 @@ export const messageHandler =
     };
 
     if (type === "announce") {
-      await announceHandler(apiClient, MessageScope, trigger.output);
+      await announceOutputHandler(apiClient, MessageScope, trigger.output);
     }
   };
 
@@ -114,10 +129,10 @@ export const raidHandler =
     };
 
     if (type === "shoutout") {
-      await shoutoutHandler(apiClient, MessageScope, trigger.output);
+      await shoutoutOutputHandler(apiClient, MessageScope, trigger.output);
     }
 
     if (type === "announce") {
-      await announceHandler(apiClient, MessageScope, trigger.output);
+      await announceOutputHandler(apiClient, MessageScope, trigger.output);
     }
   };

@@ -1,14 +1,23 @@
 import { z } from "zod";
 
+const role = [
+  "broadcaster",
+  "mod",
+  "vip",
+  "subscriber",
+  "founder",
+  "artist",
+  "non-subscriber",
+] as const;
+export type Role = (typeof role)[number];
+
 /**
  * Input
  */
 const messageInput = z.object({
   type: z.literal("message"),
   text: z.string(),
-  role: z.array(
-    z.enum(["broadcaster", "subscriber", "founder", "mod", "vip", "artist"])
-  ),
+  role: z.array(z.enum(role)),
 });
 
 export type MessageInput = z.infer<typeof messageInput>;
@@ -25,6 +34,7 @@ const announceOutput = z.object({
   type: z.literal("announce"),
   message: z.string(),
   cooldown: z.number().optional(),
+  delay: z.number().optional(),
   color: z.enum(["blue", "green", "orange", "purple", "primary"]).optional(),
 });
 
@@ -32,6 +42,7 @@ export type AnnounceOutput = z.infer<typeof announceOutput>;
 
 const shoutoutOutput = z.object({
   type: z.literal("shoutout"),
+  delay: z.number().optional(),
 });
 
 export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
@@ -40,6 +51,7 @@ const sayOutput = z.object({
   type: z.literal("say"),
   message: z.string(),
   cooldown: z.number().optional(),
+  delay: z.number().optional(),
 });
 
 /**
