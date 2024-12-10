@@ -11,6 +11,9 @@ const role = [
 ] as const;
 export type Role = (typeof role)[number];
 
+// Maximum delay is 60 seconds
+const delay = z.number().min(0).max(60).optional();
+
 /**
  * Input
  */
@@ -34,7 +37,7 @@ export type RaidInput = z.infer<typeof raidInput>;
  */
 const shoutoutOutput = z.object({
   type: z.literal("shoutout"),
-  delay: z.number().optional(),
+  delay: delay,
 });
 
 export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
@@ -43,7 +46,7 @@ const announceOutput = z.object({
   type: z.literal("announce"),
   message: z.string(),
   cooldown: z.number().optional(),
-  delay: z.number().optional(),
+  delay: delay,
   color: z.enum(["blue", "green", "orange", "purple", "primary"]).optional(),
 });
 

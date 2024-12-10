@@ -16,6 +16,7 @@ import type {
   UserNotice,
 } from "@twurple/chat";
 import { type MessageScope, messageFormatter } from "./message";
+import { wait } from "./helpers";
 
 type Client = {
   apiClient: BaseApiClient;
@@ -28,7 +29,11 @@ const announceOutputHandler = async (
   outputTrigger: AnnounceOutput
 ) => {
   const { channel } = context;
-  const { message, cooldown, color } = outputTrigger;
+  const { message, cooldown, color, delay } = outputTrigger;
+
+  if (delay) {
+    await wait(delay);
+  }
 
   // Check timer
   if (shouldRunCommand(channel.id, message, cooldown ?? 10)) {
@@ -47,8 +52,6 @@ const sayOutputHandler = async (
   const { channel } = context;
   const { message, delay } = outputTrigger;
 
-  const wait = (seconds: number) =>
-    new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   if (delay) {
     await wait(delay);
   }
