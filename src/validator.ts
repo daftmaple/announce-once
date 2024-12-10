@@ -27,9 +27,18 @@ const raidInput = z.object({
   minViewer: z.number().optional(),
 });
 
+export type RaidInput = z.infer<typeof raidInput>;
+
 /**
  * Output
  */
+const shoutoutOutput = z.object({
+  type: z.literal("shoutout"),
+  delay: z.number().optional(),
+});
+
+export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
+
 const announceOutput = z.object({
   type: z.literal("announce"),
   message: z.string(),
@@ -40,19 +49,14 @@ const announceOutput = z.object({
 
 export type AnnounceOutput = z.infer<typeof announceOutput>;
 
-const shoutoutOutput = z.object({
-  type: z.literal("shoutout"),
-  delay: z.number().optional(),
-});
-
-export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
-
 const sayOutput = z.object({
   type: z.literal("say"),
   message: z.string(),
   cooldown: z.number().optional(),
   delay: z.number().optional(),
 });
+
+export type SayOutput = z.infer<typeof sayOutput>;
 
 /**
  * Pairing

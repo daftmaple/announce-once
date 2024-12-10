@@ -4,6 +4,7 @@ import type {
   MessageTrigger,
   RaidTrigger,
   Role,
+  SayOutput,
   ShoutoutOutput,
 } from "./validator";
 import { shouldRunCommand } from "./cooldown";
@@ -38,6 +39,24 @@ const announceOutputHandler = async (
   }
 };
 
+const sayOutputHandler = async (
+  chatClient: ChatClient,
+  context: MessageScope,
+  outputTrigger: SayOutput
+) => {
+  const { channel } = context;
+  const { message, delay } = outputTrigger;
+
+  const wait = (seconds: number) =>
+    new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  if (delay) {
+    await wait(delay);
+  }
+
+  // TODO: add a timer check to handle cooldown
+  await chatClient.say(channel.name, messageFormatter(message, context));
+};
+
 const shoutoutOutputHandler = async (
   apiClient: BaseApiClient,
   { channel, user }: MessageScope,
@@ -62,7 +81,7 @@ const checkValidUser = (user: ChatUser, permission: Role[]): boolean => {
 export const messageHandler =
   (client: Client, trigger: MessageTrigger) =>
   async (channel: string, user: string, text: string, msg: ChatMessage) => {
-    const { apiClient } = client;
+    const { apiClient, chatClient } = client;
     const { type } = trigger.output;
 
     /**
@@ -79,7 +98,7 @@ export const messageHandler =
       return;
     }
 
-    const MessageScope: MessageScope = {
+    const messageScope: MessageScope = {
       channel: {
         id: msg.channelId,
         name: channel,
@@ -91,7 +110,11 @@ export const messageHandler =
     };
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, MessageScope, trigger.output);
+      await announceOutputHandler(apiClient, messageScope, trigger.output);
+    }
+
+    if (type === "say") {
+      await sayOutputHandler(chatClient, messageScope, trigger.output);
     }
   };
 
@@ -103,7 +126,7 @@ export const raidHandler =
     raidInfo: ChatRaidInfo,
     msg: UserNotice
   ) => {
-    const { apiClient } = client;
+    const { apiClient, chatClient } = client;
     const { minViewer } = trigger.input;
     const { type } = trigger.output;
 
@@ -117,7 +140,7 @@ export const raidHandler =
       return;
     }
 
-    const MessageScope: MessageScope = {
+    const messageScope: MessageScope = {
       channel: {
         id: msg.channelId,
         name: channel,
@@ -129,10 +152,14 @@ export const raidHandler =
     };
 
     if (type === "shoutout") {
-      await shoutoutOutputHandler(apiClient, MessageScope, trigger.output);
+      await shoutoutOutputHandler(apiClient, messageScope, trigger.output);
     }
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, MessageScope, trigger.output);
+      await announceOutputHandler(apiClient, messageScope, trigger.output);
+    }
+
+    if (type === "say") {
+      await sayOutputHandler(chatClient, messageScope, trigger.output);
     }
   };

@@ -70,26 +70,85 @@ The valid input and output is available on the table below, with explanation for
 
 |                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
 | ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
-| Message                        | onMessage          | X              | O              |            |                          |
-| Raid                           | onRaid             | O              | O              |            |                          |
+| Message                        | onMessage          | X              | O              | O          |                          |
+| Raid                           | onRaid             | O              | O              | O          |                          |
 | Subscriptions (Published only) |                    |                |                |            |                          |
 | Action (/me)                   |                    |                |                |            |                          |
 | Cheers                         |                    |                |                |            |                          |
 | Chat mode change               |                    |                |                |            |                          |
 
-### Output: Announce (API)
+## Input
 
-Available colour:
+### Message (`ChatClient.onMessage`)
 
-- blue
-- green
-- orange
-- purple
-- primary
+If `non-subscriber` is listed in role, then any role enables trigger.
+
+```ts
+type MessageInput = {
+  type: "message";
+  text: string;
+  role: (
+    | "broadcaster"
+    | "mod"
+    | "vip"
+    | "subscriber"
+    | "founder"
+    | "artist"
+    | "non-subscriber"
+  )[];
+};
+```
+
+### Raid (`ChatClient.onRaid`)
+
+Trigger is enabled if `minViewer` is undefined, or raider viewer count is larger than or equal to `minViewer`
+
+```ts
+type RaidInput = {
+  type: "raid";
+  minViewer?: number | undefined;
+};
+```
+
+## Output
+
+### Shoutout (`APIClient.chat.shoutoutUser`)
+
+```ts
+type ShoutoutOutput = {
+  type: "shoutout";
+  delay?: number | undefined;
+};
+```
+
+### Announce (`APIClient.chat.sendAnnouncement`)
+
+```ts
+type AnnounceOutput = {
+  type: "announce";
+  message: string;
+  cooldown?: number | undefined;
+  delay?: number | undefined;
+  color?: "blue" | "green" | "orange" | "purple" | "primary" | undefined;
+};
+```
+
+### Say (`ChatClient.say`)
+
+Behaves similarly to announce, with properties:
+
+```ts
+type SayOutput = {
+  type: "say";
+  message: string;
+  cooldown?: number | undefined;
+  delay?: number | undefined;
+};
+```
 
 ## Message output replacer available
 
-Any output fields with message field may have replacer text, which can be replaced by the `MessageScope` object below
+Any output fields with `message` field may have replacer text, which can be replaced by the `MessageScope` object below
 
 ```ts
 export type MessageScope = {
