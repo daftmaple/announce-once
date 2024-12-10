@@ -57,23 +57,119 @@ Use the `config.example.json` provided, copy it as `config.json`. Within the cha
   "channelName": "channel name where you are broadcaster/mod",
   "triggers": [
     {
-      "command": "Text where message below will be sent if matches the text sent on chat",
-      "message": "Message announced by the bot",
-      "color": "Colour of the announcement, optional",
-      "cooldown": "Cooldown of the command, in seconds, optional (defaults to 10 seconds)"
+      "input": {}, // Input kind
+      "output": {} // Output kind
     }
-  ],
-  "shoutout": {
-    "enabled": "if shoutout of raider is enabled, in boolean",
-    "minViewer": "minimum viewer required to shout out user automatically"
-  }
+  ]
 }
 ```
 
-Available colour:
+The valid input and output is available on the table below, with explanation for each section
 
-- blue
-- green
-- orange
-- purple
-- primary
+## Table of valid input-output pair
+
+|                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
+| ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
+| Message                        | onMessage          | X              | O              | O          |                          |
+| Raid                           | onRaid             | O              | O              | O          |                          |
+| Subscriptions (Published only) |                    |                |                |            |                          |
+| Action (/me)                   |                    |                |                |            |                          |
+| Cheers                         |                    |                |                |            |                          |
+| Chat mode change               |                    |                |                |            |                          |
+
+## Input
+
+### Message (`ChatClient.onMessage`)
+
+If `non-subscriber` is listed in role, then any role enables trigger.
+
+```ts
+type MessageInput = {
+  type: "message";
+  text: string;
+  role: (
+    | "broadcaster"
+    | "mod"
+    | "vip"
+    | "subscriber"
+    | "founder"
+    | "artist"
+    | "non-subscriber"
+  )[];
+};
+```
+
+### Raid (`ChatClient.onRaid`)
+
+Trigger is enabled if `minViewer` is undefined, or raider viewer count is larger than or equal to `minViewer`
+
+```ts
+type RaidInput = {
+  type: "raid";
+  minViewer?: number | undefined;
+};
+```
+
+## Output
+
+### Shoutout (`APIClient.chat.shoutoutUser`)
+
+```ts
+type ShoutoutOutput = {
+  type: "shoutout";
+  delay?: number | undefined;
+};
+```
+
+### Announce (`APIClient.chat.sendAnnouncement`)
+
+```ts
+type AnnounceOutput = {
+  type: "announce";
+  message: string;
+  cooldown?: number | undefined;
+  delay?: number | undefined;
+  color?: "blue" | "green" | "orange" | "purple" | "primary" | undefined;
+};
+```
+
+### Say (`ChatClient.say`)
+
+Behaves similarly to announce, with properties:
+
+```ts
+type SayOutput = {
+  type: "say";
+  message: string;
+  cooldown?: number | undefined;
+  delay?: number | undefined;
+};
+```
+
+## Message output replacer available
+
+Any output fields with `message` field may have replacer text, which can be replaced by the `MessageScope` object below
+
+```ts
+export type MessageScope = {
+  channel: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+  };
+};
+```
+
+To access properties eg. user, use double curly braces as replacer:
+
+```json
+{
+  "type": "announce",
+  "message": "Thank you {{user.name}} for the raid!",
+  "cooldown": 10,
+  "color": "purple"
+}
+```
