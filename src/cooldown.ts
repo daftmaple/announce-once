@@ -5,40 +5,40 @@ type Tagged<BaseType, Tag extends PropertyKey> = BaseType & {
 };
 
 type ChannelName = Tagged<string, "ChannelName">;
-type Command = Tagged<string, "Command">;
+type InputKey = Tagged<string, "InputKey">;
 type LastSent = Tagged<number, "LastSent">;
 
 const channelAnnouncerMapping: Map<
   ChannelName,
-  Map<Command, LastSent>
+  Map<InputKey, LastSent>
 > = new Map();
 
 /**
  * @param channelName
- * @param command
+ * @param inputKey Distinction key for the command should be run
  * @param cooldown Cooldown in seconds
  *
  * TODO: implement this so that it handles all IO system
  */
 export const shouldRunCommand = (
   channelName: string,
-  command: string,
+  inputKey: string,
   cooldown: number
 ) => {
   const currentTimestamp = performance.now();
 
   let channel = channelAnnouncerMapping.get(channelName as ChannelName);
   if (!channel) {
-    channel = new Map<Command, LastSent>();
+    channel = new Map<InputKey, LastSent>();
     channelAnnouncerMapping.set(channelName as ChannelName, channel);
   }
 
-  // Get last timestamp when the command is triggered
-  const lastSent = channel.get(command as Command);
+  // Get last timestamp when the InputKey is triggered
+  const lastSent = channel.get(inputKey as InputKey);
 
-  // If has not been triggered or has reached cooldown, command should be run and update last sent timestamp
+  // If has not been triggered or has reached cooldown, InputKey should be run and update last sent timestamp
   if (!lastSent || currentTimestamp - lastSent > cooldown * 1000) {
-    channel.set(command as Command, currentTimestamp as LastSent);
+    channel.set(inputKey as InputKey, currentTimestamp as LastSent);
     return true;
   }
 

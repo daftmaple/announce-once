@@ -16,6 +16,7 @@ import type {
   UserNotice,
 } from "@twurple/chat";
 import { type MessageScope, messageFormatter } from "./message";
+import { wait } from "./helpers";
 
 type Client = {
   apiClient: BaseApiClient;
@@ -25,13 +26,18 @@ type Client = {
 const announceOutputHandler = async (
   apiClient: BaseApiClient,
   context: MessageScope,
+  inputKey: string,
   outputTrigger: AnnounceOutput
 ) => {
   const { channel } = context;
-  const { message, cooldown, color } = outputTrigger;
+  const { message, cooldown, color, delay } = outputTrigger;
+
+  if (delay) {
+    await wait(delay);
+  }
 
   // Check timer
-  if (shouldRunCommand(channel.id, message, cooldown ?? 10)) {
+  if (shouldRunCommand(channel.id, inputKey, cooldown ?? 10)) {
     await apiClient.chat.sendAnnouncement(channel.id, {
       message: messageFormatter(message, context),
       color,
@@ -47,8 +53,6 @@ const sayOutputHandler = async (
   const { channel } = context;
   const { message, delay } = outputTrigger;
 
-  const wait = (seconds: number) =>
-    new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   if (delay) {
     await wait(delay);
   }
@@ -110,7 +114,13 @@ export const messageHandler =
     };
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${trigger.input.text}`;
+      await announceOutputHandler(
+        apiClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
 
     if (type === "say") {
@@ -156,7 +166,13 @@ export const raidHandler =
     }
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${channel}`;
+      await announceOutputHandler(
+        apiClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
 
     if (type === "say") {
