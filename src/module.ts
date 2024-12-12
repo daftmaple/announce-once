@@ -26,6 +26,7 @@ type Client = {
 const announceOutputHandler = async (
   apiClient: BaseApiClient,
   context: MessageScope,
+  inputKey: string,
   outputTrigger: AnnounceOutput
 ) => {
   const { channel } = context;
@@ -36,7 +37,7 @@ const announceOutputHandler = async (
   }
 
   // Check timer
-  if (shouldRunCommand(channel.id, message, cooldown ?? 10)) {
+  if (shouldRunCommand(channel.id, inputKey, cooldown ?? 10)) {
     await apiClient.chat.sendAnnouncement(channel.id, {
       message: messageFormatter(message, context),
       color,
@@ -113,7 +114,13 @@ export const messageHandler =
     };
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${trigger.input.text}`;
+      await announceOutputHandler(
+        apiClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
 
     if (type === "say") {
@@ -159,7 +166,13 @@ export const raidHandler =
     }
 
     if (type === "announce") {
-      await announceOutputHandler(apiClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${channel}`;
+      await announceOutputHandler(
+        apiClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
 
     if (type === "say") {
