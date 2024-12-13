@@ -1,6 +1,7 @@
 import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 import type {
   AnnounceOutput,
+  MessageMatcher,
   MessageTrigger,
   RaidTrigger,
   Role,
@@ -93,6 +94,30 @@ const checkValidUser = (user: ChatUser, permission: Role[]): boolean => {
   return permission.includes("non-subscriber");
 };
 
+/**
+ * Match string
+ * If message matcher type is not defined, defaults to startsWith
+ */
+const matchString = (matcher: MessageMatcher, text: string): boolean => {
+  let caseSensitive = true;
+  if (typeof matcher.caseSensitive !== "undefined") {
+    caseSensitive = matcher.caseSensitive;
+  }
+
+  const matcherText = caseSensitive ? matcher.text : matcher.text.toLowerCase();
+  const textToMatch = caseSensitive ? text : text.toLowerCase();
+
+  if (matcher.type === "exact") {
+    return textToMatch === matcherText;
+  }
+
+  if (matcher.type === "includes") {
+    return textToMatch.includes(matcherText);
+  }
+
+  return textToMatch.startsWith(matcherText);
+};
+
 export const messageHandler =
   (client: Client, trigger: MessageTrigger) =>
   async (channel: string, user: string, text: string, msg: ChatMessage) => {
@@ -104,7 +129,7 @@ export const messageHandler =
      * - If input text is matching the trigger text
      * - Check text message's user privilege
      */
-    if (trigger.input.text !== text) return;
+    if (!matchString(trigger.input.message, text)) return;
     if (!checkValidUser(msg.userInfo, trigger.input.role)) return;
 
     // Compose MessageScope object
@@ -124,8 +149,9 @@ export const messageHandler =
       },
     };
 
+    const inputKey = `${trigger.input.type}-${trigger.input.message.text}`;
+
     if (type === "announce") {
-      const inputKey = `${trigger.input.type}-${trigger.input.text}`;
       await announceOutputHandler(
         apiClient,
         messageScope,
@@ -135,7 +161,6 @@ export const messageHandler =
     }
 
     if (type === "say") {
-      const inputKey = `${trigger.input.type}-${trigger.input.text}`;
       await sayOutputHandler(
         chatClient,
         messageScope,
@@ -178,12 +203,13 @@ export const raidHandler =
       },
     };
 
+    const inputKey = `${trigger.input.type}-${user}`;
+
     if (type === "shoutout") {
       await shoutoutOutputHandler(apiClient, messageScope, trigger.output);
     }
 
     if (type === "announce") {
-      const inputKey = `${trigger.input.type}-${user}`;
       await announceOutputHandler(
         apiClient,
         messageScope,
@@ -193,7 +219,6 @@ export const raidHandler =
     }
 
     if (type === "say") {
-      const inputKey = `${trigger.input.type}-${user}`;
       await sayOutputHandler(
         chatClient,
         messageScope,
@@ -235,8 +260,9 @@ export const subHandler =
       },
     };
 
+    const inputKey = `${trigger.input.type}-${user}`;
+
     if (type === "announce") {
-      const inputKey = `${trigger.input.type}-${channel}`;
       await announceOutputHandler(
         apiClient,
         messageScope,
@@ -246,7 +272,6 @@ export const subHandler =
     }
 
     if (type === "say") {
-      const inputKey = `${trigger.input.type}-${user}`;
       await sayOutputHandler(
         chatClient,
         messageScope,

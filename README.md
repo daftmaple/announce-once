@@ -84,9 +84,15 @@ The valid input and output is available on the table below, with explanation for
 If `non-subscriber` is listed in role, then any role enables trigger.
 
 ```ts
+type MessageMatcher = {
+  text: string;
+  type?: "exact" | "includes" | "startsWith"; // default startsWith
+  caseSensitive?: boolean; // default true
+};
+
 type MessageInput = {
   type: "message";
-  text: string;
+  message: MessageMatcher;
   role: (
     | "broadcaster"
     | "mod"

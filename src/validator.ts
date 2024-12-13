@@ -14,12 +14,22 @@ export type Role = (typeof role)[number];
 // Maximum delay is 60 seconds
 const delay = z.number().min(0).max(60).optional();
 
+const matchingStrategy = ["exact", "includes", "startsWith"] as const;
+
+const messageMatcher = z.object({
+  text: z.string(),
+  type: z.enum(matchingStrategy).optional(),
+  caseSensitive: z.boolean().optional(),
+});
+
+export type MessageMatcher = z.infer<typeof messageMatcher>;
+
 /**
  * Input
  */
 const messageInput = z.object({
   type: z.literal("message"),
-  text: z.string(),
+  message: messageMatcher,
   role: z.array(z.enum(role)),
 });
 
