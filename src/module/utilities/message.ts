@@ -1,15 +1,6 @@
 import { render } from "micromustache";
 
-export type MessageScope = {
-  channel: {
-    id: string;
-    name: string;
-  };
-  user: {
-    id: string;
-    name: string;
-  };
-};
+import type { MessageScope } from "../type";
 
 export const messageFormatter = (template: string, scope: MessageScope) =>
   render(template, scope);

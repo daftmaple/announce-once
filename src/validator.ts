@@ -14,12 +14,22 @@ export type Role = (typeof role)[number];
 // Maximum delay is 60 seconds
 const delay = z.number().min(0).max(60).optional();
 
+const matchingStrategy = ["exact", "includes", "startsWith"] as const;
+
+const messageMatcher = z.object({
+  text: z.string(),
+  type: z.enum(matchingStrategy).optional(),
+  caseSensitive: z.boolean().optional(),
+});
+
+export type MessageMatcher = z.infer<typeof messageMatcher>;
+
 /**
  * Input
  */
 const messageInput = z.object({
   type: z.literal("message"),
-  text: z.string(),
+  message: messageMatcher,
   role: z.array(z.enum(role)),
 });
 
@@ -32,6 +42,12 @@ const raidInput = z.object({
 
 export type RaidInput = z.infer<typeof raidInput>;
 
+const subInput = z.object({
+  type: z.literal("sub"),
+});
+
+export type SubInput = z.infer<typeof subInput>;
+
 /**
  * Output
  */
@@ -39,8 +55,6 @@ const shoutoutOutput = z.object({
   type: z.literal("shoutout"),
   delay: delay,
 });
-
-export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
 
 const announceOutput = z.object({
   type: z.literal("announce"),
@@ -78,10 +92,17 @@ const messageTrigger = z.object({
 
 export type MessageTrigger = z.infer<typeof messageTrigger>;
 
+const subTrigger = z.object({
+  input: subInput,
+  output: z.union([announceOutput, sayOutput]),
+});
+
+export type SubTrigger = z.infer<typeof subTrigger>;
+
 /**
  * Schema
  */
-const trigger = z.union([raidTrigger, messageTrigger]);
+const trigger = z.union([raidTrigger, messageTrigger, subTrigger]);
 export type Trigger = z.infer<typeof trigger>;
 
 export const configSchema = z.object({

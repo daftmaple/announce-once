@@ -1,7 +1,7 @@
 declare const tags: unique symbol;
 
 type Tagged<BaseType, Tag extends PropertyKey> = BaseType & {
-  [tags]: { [K in Tag]: void };
+  [tags]: Record<Tag, void>;
 };
 
 type ChannelName = Tagged<string, "ChannelName">;
@@ -11,14 +11,12 @@ type LastSent = Tagged<number, "LastSent">;
 const channelAnnouncerMapping: Map<
   ChannelName,
   Map<InputKey, LastSent>
-> = new Map();
+> = new Map<ChannelName, Map<InputKey, LastSent>>();
 
 /**
  * @param channelName
  * @param inputKey Distinction key for the command should be run
  * @param cooldown Cooldown in seconds
- *
- * TODO: implement this so that it handles all IO system
  */
 export const shouldRunCommand = (
   channelName: string,
