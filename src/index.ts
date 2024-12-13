@@ -8,40 +8,33 @@ import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 import {
   type MessageTrigger,
   type RaidTrigger,
+  SubTrigger,
   type Trigger,
   configSchema,
   tokensSchema,
 } from "./validator";
-import { messageHandler, raidHandler } from "./module";
+import { messageHandler, raidHandler, subHandler } from "./module";
 
 /**
  * Initial validation
  */
-const clientConfig = JSON.parse(
+const rawClientConfig = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), "config.json"), "utf-8")
 );
 
-const parsedClientConfig = configSchema.safeParse(clientConfig);
+const clientConfig = configSchema.parse(rawClientConfig);
 
-if (!parsedClientConfig.success) {
-  throw parsedClientConfig.error;
-}
-
-const tokenData = JSON.parse(
+const rawTokenData = JSON.parse(
   fs.readFileSync(path.join(process.cwd(), "tokens.json"), "utf-8")
 );
 
-const parsedTokenData = tokensSchema.safeParse(tokenData);
-
-if (!parsedTokenData.success) {
-  throw parsedTokenData.error;
-}
+const initialTokenData = tokensSchema.parse(rawTokenData);
 
 /**
  * Main function
  */
 const main = async () => {
-  const { clientId, clientSecret, botName, channels } = parsedClientConfig.data;
+  const { clientId, clientSecret, botName, channels } = clientConfig;
 
   /**
    * auth section
@@ -59,7 +52,7 @@ const main = async () => {
     )
   );
 
-  await authProvider.addUserForToken(parsedTokenData.data, ["chat"]);
+  await authProvider.addUserForToken(initialTokenData, ["chat"]);
 
   /**
    * api client section, used to obtain bot user id and later on for announcement api calls
@@ -101,6 +94,7 @@ const main = async () => {
       ({ channelName }) => channelName === currentChannelName
     );
 
+    // Do command if matching input type is detected
     if (channelToTrigger) {
       const filterMessageAsInputTrigger = (t: Trigger): t is MessageTrigger =>
         t.input.type === "message";
@@ -130,7 +124,7 @@ const main = async () => {
         ({ channelName }) => channelName === currentChannelName
       );
 
-      // Send shoutout command to channel if shoutout is enabled
+      // Do command if matching input type is detected
       if (channelToTrigger) {
         const filterRaidAsInputTrigger = (t: Trigger): t is RaidTrigger =>
           t.input.type === "raid";
@@ -153,6 +147,37 @@ const main = async () => {
       }
     }
   );
+
+  chatClient.onSub(async (currentChannelName, subscriberName, subInfo, msg) => {
+    // Get matching channel from channels list
+    const channelToTrigger = channels.find(
+      ({ channelName }) => channelName === currentChannelName
+    );
+
+    // Do command if matching input type is detected
+    if (channelToTrigger) {
+      const filterSubAsInputTrigger = (t: Trigger): t is SubTrigger =>
+        t.input.type === "sub";
+
+      // Get matching input trigger
+      const triggers = channelToTrigger.triggers.filter(
+        filterSubAsInputTrigger
+      );
+
+      triggers.forEach(async (trigger) => {
+        try {
+          await subHandler({ apiClient: apiClientAsUser, chatClient }, trigger)(
+            currentChannelName,
+            subscriberName,
+            subInfo,
+            msg
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+  });
 };
 
 main();

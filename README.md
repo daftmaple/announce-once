@@ -68,14 +68,14 @@ The valid input and output is available on the table below, with explanation for
 
 ## Table of valid input-output pair
 
-|                                | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
-| ------------------------------ | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
-| Message                        | onMessage          | X              | O              | O          |                          |
-| Raid                           | onRaid             | O              | O              | O          |                          |
-| Subscriptions (Published only) |                    |                |                |            |                          |
-| Action (/me)                   |                    |                |                |            |                          |
-| Cheers                         |                    |                |                |            |                          |
-| Chat mode change               |                    |                |                |            |                          |
+|                                  | _ChatClient event_ | Shoutout (API) | Announce (API) | Say (Chat) | Moderation actions (API) |
+| -------------------------------- | ------------------ | -------------- | -------------- | ---------- | ------------------------ |
+| Message                          | onMessage          | X              | O              | O          |                          |
+| Raid                             | onRaid             | O              | O              | O          |                          |
+| Subscriptions (Vanilla sub only) | onSub              | X              | O              | O          |                          |
+| Action (/me)                     |                    |                |                |            |                          |
+| Cheers                           |                    |                |                |            |                          |
+| Chat mode change                 |                    |                |                |            |                          |
 
 ## Input
 
@@ -133,6 +133,8 @@ type AnnounceOutput = {
 };
 ```
 
+If cooldown is not defined, this defaults to 10 seconds.
+
 ### Say (`ChatClient.say`)
 
 Behaves similarly to announce, with properties:
@@ -145,6 +147,8 @@ type SayOutput = {
   delay?: number | undefined;
 };
 ```
+
+Cooldown on [say](#say-chatclientsay) behaves differently to [announce](#announce-apiclientchatsendannouncement). If this is not defined, cooldown is entirely skipped
 
 ## Message output replacer available
 
@@ -160,7 +164,17 @@ export type MessageScope = {
     id: string;
     name: string;
   };
+  subInfo?: {
+    plan: SubType;
+    streak?: number;
+  };
 };
+```
+
+`subInfo` is available only on subscription event, otherwise this will return `undefined`
+
+```ts
+type SubType = "tier1" | "tier2" | "tier3" | "prime";
 ```
 
 To access properties eg. user, use double curly braces as replacer:

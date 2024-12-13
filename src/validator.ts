@@ -32,6 +32,12 @@ const raidInput = z.object({
 
 export type RaidInput = z.infer<typeof raidInput>;
 
+const subInput = z.object({
+  type: z.literal("sub"),
+});
+
+export type SubInput = z.infer<typeof subInput>;
+
 /**
  * Output
  */
@@ -78,10 +84,17 @@ const messageTrigger = z.object({
 
 export type MessageTrigger = z.infer<typeof messageTrigger>;
 
+const subTrigger = z.object({
+  input: subInput,
+  output: z.union([announceOutput, sayOutput]),
+});
+
+export type SubTrigger = z.infer<typeof subTrigger>;
+
 /**
  * Schema
  */
-const trigger = z.union([raidTrigger, messageTrigger]);
+const trigger = z.union([raidTrigger, messageTrigger, subTrigger]);
 export type Trigger = z.infer<typeof trigger>;
 
 export const configSchema = z.object({

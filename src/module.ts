@@ -6,17 +6,19 @@ import type {
   Role,
   SayOutput,
   ShoutoutOutput,
+  SubTrigger,
 } from "./validator";
 import { shouldRunCommand } from "./cooldown";
 import type {
   ChatClient,
   ChatMessage,
   ChatRaidInfo,
+  ChatSubInfo,
   ChatUser,
   UserNotice,
 } from "@twurple/chat";
 import { type MessageScope, messageFormatter } from "./message";
-import { wait } from "./helpers";
+import { convertSubType, wait } from "./helpers";
 
 type Client = {
   apiClient: BaseApiClient;
@@ -36,7 +38,7 @@ const announceOutputHandler = async (
     await wait(delay);
   }
 
-  // Check timer
+  // Check timer, if cooldown is not defined, defaults to 10 seconds
   if (shouldRunCommand(channel.id, inputKey, cooldown ?? 10)) {
     await apiClient.chat.sendAnnouncement(channel.id, {
       message: messageFormatter(message, context),
@@ -48,17 +50,26 @@ const announceOutputHandler = async (
 const sayOutputHandler = async (
   chatClient: ChatClient,
   context: MessageScope,
+  inputKey: string,
   outputTrigger: SayOutput
 ) => {
   const { channel } = context;
-  const { message, delay } = outputTrigger;
+  const { message, cooldown, delay } = outputTrigger;
 
   if (delay) {
     await wait(delay);
   }
 
-  // TODO: add a timer check to handle cooldown
-  await chatClient.say(channel.name, messageFormatter(message, context));
+  let shouldSay = true;
+
+  // Check timer if cooldown specified
+  if (cooldown) {
+    shouldSay = shouldRunCommand(channel.id, inputKey, cooldown);
+  }
+
+  if (shouldSay) {
+    await chatClient.say(channel.name, messageFormatter(message, context));
+  }
 };
 
 const shoutoutOutputHandler = async (
@@ -124,7 +135,13 @@ export const messageHandler =
     }
 
     if (type === "say") {
-      await sayOutputHandler(chatClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${trigger.input.text}`;
+      await sayOutputHandler(
+        chatClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
   };
 
@@ -166,6 +183,59 @@ export const raidHandler =
     }
 
     if (type === "announce") {
+      const inputKey = `${trigger.input.type}-${user}`;
+      await announceOutputHandler(
+        apiClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
+    }
+
+    if (type === "say") {
+      const inputKey = `${trigger.input.type}-${user}`;
+      await sayOutputHandler(
+        chatClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
+    }
+  };
+
+export const subHandler =
+  (client: Client, trigger: SubTrigger) =>
+  async (
+    channel: string,
+    user: string,
+    subInfo: ChatSubInfo,
+    msg: UserNotice
+  ) => {
+    const { apiClient, chatClient } = client;
+    const { type } = trigger.output;
+
+    // Compose MessageScope object
+    if (!msg.channelId) {
+      console.error("Missing channelId on msg (UserNotice)");
+      return;
+    }
+
+    const messageScope: MessageScope = {
+      channel: {
+        id: msg.channelId,
+        name: channel,
+      },
+      user: {
+        id: msg.userInfo.userId,
+        name: user,
+      },
+      subInfo: {
+        plan: convertSubType(subInfo.plan),
+        streak: subInfo.streak,
+      },
+    };
+
+    if (type === "announce") {
       const inputKey = `${trigger.input.type}-${channel}`;
       await announceOutputHandler(
         apiClient,
@@ -176,6 +246,12 @@ export const raidHandler =
     }
 
     if (type === "say") {
-      await sayOutputHandler(chatClient, messageScope, trigger.output);
+      const inputKey = `${trigger.input.type}-${user}`;
+      await sayOutputHandler(
+        chatClient,
+        messageScope,
+        inputKey,
+        trigger.output
+      );
     }
   };
