@@ -13,7 +13,10 @@ import {
   configSchema,
   tokensSchema,
 } from "./validator";
-import { messageHandler, raidHandler, subHandler } from "./module";
+
+import { messageInputHandler } from "./module/input/message";
+import { raidInputHandler } from "./module/input/raid";
+import { subInputHandler } from "./module/input/sub";
 
 /**
  * Initial validation
@@ -106,7 +109,7 @@ const main = async () => {
 
       triggers.forEach(async (trigger) => {
         try {
-          await messageHandler(
+          await messageInputHandler(
             { apiClient: apiClientAsUser, chatClient },
             trigger
           )(currentChannelName, userName, text, msg);
@@ -136,7 +139,7 @@ const main = async () => {
 
         triggers.forEach(async (trigger) => {
           try {
-            await raidHandler(
+            await raidInputHandler(
               { apiClient: apiClientAsUser, chatClient },
               trigger
             )(currentChannelName, raiderChannelName, raidInfo, msg);
@@ -166,12 +169,10 @@ const main = async () => {
 
       triggers.forEach(async (trigger) => {
         try {
-          await subHandler({ apiClient: apiClientAsUser, chatClient }, trigger)(
-            currentChannelName,
-            subscriberName,
-            subInfo,
-            msg
-          );
+          await subInputHandler(
+            { apiClient: apiClientAsUser, chatClient },
+            trigger
+          )(currentChannelName, subscriberName, subInfo, msg);
         } catch (e) {
           console.error(e);
         }

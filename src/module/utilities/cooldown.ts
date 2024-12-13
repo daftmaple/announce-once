@@ -17,8 +17,6 @@ const channelAnnouncerMapping: Map<
  * @param channelName
  * @param inputKey Distinction key for the command should be run
  * @param cooldown Cooldown in seconds
- *
- * TODO: implement this so that it handles all IO system
  */
 export const shouldRunCommand = (
   channelName: string,

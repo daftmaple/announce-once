@@ -84,6 +84,15 @@ The valid input and output is available on the table below, with explanation for
 If `non-subscriber` is listed in role, then any role enables trigger.
 
 ```ts
+type Role =
+  | "broadcaster"
+  | "mod"
+  | "vip"
+  | "subscriber"
+  | "founder"
+  | "artist"
+  | "non-subscriber";
+
 type MessageMatcher = {
   text: string;
   type?: "exact" | "includes" | "startsWith"; // default startsWith
@@ -93,15 +102,7 @@ type MessageMatcher = {
 type MessageInput = {
   type: "message";
   message: MessageMatcher;
-  role: (
-    | "broadcaster"
-    | "mod"
-    | "vip"
-    | "subscriber"
-    | "founder"
-    | "artist"
-    | "non-subscriber"
-  )[];
+  role: Role[];
 };
 ```
 
