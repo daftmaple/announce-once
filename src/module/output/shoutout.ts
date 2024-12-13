@@ -1,6 +1,6 @@
 import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
-import { MessageScope } from "../../message";
 import { ShoutoutOutput } from "../../validator";
+import { MessageScope } from "../type";
 
 export const shoutoutOutputHandler = async (
   apiClient: BaseApiClient,

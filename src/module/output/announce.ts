@@ -1,8 +1,9 @@
 import { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 import { shouldRunCommand } from "../utilities/cooldown";
 import { wait } from "../../helpers";
-import { MessageScope, messageFormatter } from "../../message";
+import { messageFormatter } from "../utilities/message";
 import { AnnounceOutput } from "../../validator";
+import { MessageScope } from "../type";
 
 export const announceOutputHandler = async (
   apiClient: BaseApiClient,

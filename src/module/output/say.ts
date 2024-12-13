@@ -1,8 +1,9 @@
 import { ChatClient } from "@twurple/chat";
 import { shouldRunCommand } from "../utilities/cooldown";
 import { wait } from "../../helpers";
-import { MessageScope, messageFormatter } from "../../message";
+import { messageFormatter } from "../utilities/message";
 import { SayOutput } from "../../validator";
+import { MessageScope } from "../type";
 
 export const sayOutputHandler = async (
   chatClient: ChatClient,

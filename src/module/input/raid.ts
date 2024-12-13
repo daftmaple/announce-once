@@ -1,10 +1,9 @@
 import { ChatRaidInfo, UserNotice } from "@twurple/chat";
-import { MessageScope } from "../../message";
 import { RaidTrigger } from "../../validator";
 import { announceOutputHandler } from "../output/announce";
 import { sayOutputHandler } from "../output/say";
 import { shoutoutOutputHandler } from "../output/shoutout";
-import { Client } from "../type";
+import { Client, MessageScope } from "../type";
 
 export const raidInputHandler =
   (client: Client, trigger: RaidTrigger) =>
