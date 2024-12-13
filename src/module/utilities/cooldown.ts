@@ -1,7 +1,7 @@
 declare const tags: unique symbol;
 
 type Tagged<BaseType, Tag extends PropertyKey> = BaseType & {
-  [tags]: { [K in Tag]: void };
+  [tags]: Record<Tag, void>;
 };
 
 type ChannelName = Tagged<string, "ChannelName">;
@@ -11,7 +11,7 @@ type LastSent = Tagged<number, "LastSent">;
 const channelAnnouncerMapping: Map<
   ChannelName,
   Map<InputKey, LastSent>
-> = new Map();
+> = new Map<ChannelName, Map<InputKey, LastSent>>();
 
 /**
  * @param channelName

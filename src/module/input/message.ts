@@ -1,8 +1,9 @@
-import { ChatUser, ChatMessage } from "@twurple/chat";
-import { Role, MessageMatcher, MessageTrigger } from "../../validator";
+import type { ChatMessage, ChatUser } from "@twurple/chat";
+
+import type { MessageMatcher, MessageTrigger, Role } from "../../validator";
 import { announceOutputHandler } from "../output/announce";
 import { sayOutputHandler } from "../output/say";
-import { Client, MessageScope } from "../type";
+import type { Client, MessageScope } from "../type";
 
 const checkValidUser = (user: ChatUser, permission: Role[]): boolean => {
   // Surely there should be a cleaner way to do this

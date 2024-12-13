@@ -1,9 +1,10 @@
-import { ChatRaidInfo, UserNotice } from "@twurple/chat";
-import { RaidTrigger } from "../../validator";
+import type { ChatRaidInfo, UserNotice } from "@twurple/chat";
+
+import type { RaidTrigger } from "../../validator";
 import { announceOutputHandler } from "../output/announce";
 import { sayOutputHandler } from "../output/say";
 import { shoutoutOutputHandler } from "../output/shoutout";
-import { Client, MessageScope } from "../type";
+import type { Client, MessageScope } from "../type";
 
 export const raidInputHandler =
   (client: Client, trigger: RaidTrigger) =>
@@ -41,7 +42,7 @@ export const raidInputHandler =
     const inputKey = `${trigger.input.type}-${user}`;
 
     if (type === "shoutout") {
-      await shoutoutOutputHandler(apiClient, messageScope, trigger.output);
+      await shoutoutOutputHandler(apiClient, messageScope);
     }
 
     if (type === "announce") {

@@ -1,14 +1,14 @@
 import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
-import { ChatClient } from "@twurple/chat";
+import type { ChatClient } from "@twurple/chat";
 
-import { SubType } from "../helpers";
+import type { SubType } from "../helpers";
 
-export type Client = {
+export interface Client {
   apiClient: BaseApiClient;
   chatClient: ChatClient;
-};
+}
 
-export type MessageScope = {
+export interface MessageScope {
   channel: {
     id: string;
     name: string;
@@ -21,4 +21,4 @@ export type MessageScope = {
     plan: SubType;
     streak?: number;
   };
-};
+}

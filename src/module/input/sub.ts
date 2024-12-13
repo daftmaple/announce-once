@@ -1,9 +1,10 @@
-import { ChatSubInfo, UserNotice } from "@twurple/chat";
+import type { ChatSubInfo, UserNotice } from "@twurple/chat";
+
 import { convertSubType } from "../../helpers";
-import { SubTrigger } from "../../validator";
+import type { SubTrigger } from "../../validator";
 import { announceOutputHandler } from "../output/announce";
 import { sayOutputHandler } from "../output/say";
-import { Client, MessageScope } from "../type";
+import type { Client, MessageScope } from "../type";
 
 export const subInputHandler =
   (client: Client, trigger: SubTrigger) =>

@@ -1,22 +1,24 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/require-await, @typescript-eslint/no-misused-promises, @typescript-eslint/no-floating-promises */
+
 import fs from "fs";
 import path from "path";
-import { RefreshingAuthProvider } from "@twurple/auth";
-import { ApiClient } from "@twurple/api";
-import { ChatClient } from "@twurple/chat";
-import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
 
-import {
-  type MessageTrigger,
-  type RaidTrigger,
-  SubTrigger,
-  type Trigger,
-  configSchema,
-  tokensSchema,
-} from "./validator";
+import { ApiClient } from "@twurple/api";
+import type { BaseApiClient } from "@twurple/api/lib/client/BaseApiClient";
+import { RefreshingAuthProvider } from "@twurple/auth";
+import { ChatClient } from "@twurple/chat";
 
 import { messageInputHandler } from "./module/input/message";
 import { raidInputHandler } from "./module/input/raid";
 import { subInputHandler } from "./module/input/sub";
+import {
+  type SubTrigger,
+  type MessageTrigger,
+  type RaidTrigger,
+  type Trigger,
+  configSchema,
+  tokensSchema,
+} from "./validator";
 
 /**
  * Initial validation
@@ -47,13 +49,13 @@ const main = async () => {
     clientSecret,
   });
 
-  authProvider.onRefresh(async (_userId, newTokenData) =>
+  authProvider.onRefresh(async (_userId, newTokenData) => {
     fs.writeFileSync(
       path.join(process.cwd(), `tokens.json`),
       JSON.stringify(newTokenData, null, 4),
       "utf-8"
-    )
-  );
+    );
+  });
 
   await authProvider.addUserForToken(initialTokenData, ["chat"]);
 
