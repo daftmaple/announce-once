@@ -56,6 +56,8 @@ const shoutoutOutput = z.object({
   delay: delay,
 });
 
+export type ShoutoutOutput = z.infer<typeof shoutoutOutput>;
+
 const announceOutput = z.object({
   type: z.literal("announce"),
   message: z.string(),
